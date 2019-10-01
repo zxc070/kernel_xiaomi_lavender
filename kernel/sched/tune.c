@@ -832,6 +832,31 @@ schedtune_boostgroup_init(struct schedtune *st)
 	return 0;
 }
 
+#ifdef CONFIG_STUNE_ASSIST
+static void write_default_values(struct cgroup_subsys_state *css)
+{
+	u8 i;
+	char cg_name[11];
+	const int boost_values[5] = { 0, 1, 0, 0, 0 };
+	const bool prefer_idle_values[5] = { 0, 1, 1, 0, 0 };
+	const char *stune_groups[] =
+	{ "/", "top-app", "foreground", "background", "audio-app" };
+
+	/* Get the name of a group that was parsed */
+	cgroup_name(css->cgroup, cg_name, sizeof(cg_name));
+
+	for (i = 0; i < ARRAY_SIZE(stune_groups); i++) {
+		/* Look it up in the array and set values */
+		if (!memcmp(cg_name, stune_groups[i], sizeof(*stune_groups[i]))) {
+			boost_write(css, NULL, boost_values[i]);
+			prefer_idle_write(css, NULL, prefer_idle_values[i]);
+			pr_info("%s: setting %s to %i and %i\n",
+			__func__, stune_groups[i], boost_values[i], prefer_idle_values[i]);
+		}
+	}
+}
+#endif
+
 static struct cgroup_subsys_state *
 schedtune_css_alloc(struct cgroup_subsys_state *parent_css)
 {
