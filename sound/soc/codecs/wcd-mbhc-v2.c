@@ -1,5 +1,4 @@
 /* Copyright (c) 2015-2017, The Linux Foundation. All rights reserved.
- * Copyright (C) 2019 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -2344,6 +2343,7 @@ static irqreturn_t wcd_mbhc_hphr_ocp_irq(int irq, void *data)
 done:
 	return IRQ_HANDLED;
 }
+
 static int wcd_mbhc_initialise(struct wcd_mbhc *mbhc)
 {
 	int ret = 0;
@@ -2641,6 +2641,7 @@ static int wcd_mbhc_usb_c_event_changed(struct notifier_block *nb,
 
 	if (ptr != mbhc->usb_psy || evt != PSY_EVENT_PROP_CHANGED)
 		return 0;
+
 	ret = power_supply_get_property(mbhc->usb_psy,
 			POWER_SUPPLY_PROP_TYPEC_MODE, &mode);
 	if (ret) {

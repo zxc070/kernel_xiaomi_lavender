@@ -1,5 +1,4 @@
 /* Copyright (c) 2015-2018, The Linux Foundation. All rights reserved.
- * Copyright (C) 2019 XiaoMi, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -3299,8 +3298,6 @@ static int msm_asoc_machine_probe(struct platform_device *pdev)
 	}
 	if (pdata->snd_card_val != INT_SND_CARD)
 		msm_ext_register_audio_notifier(pdev);
-
-	printk("%s_ok\n", __func__);
 
 	return 0;
 err:
