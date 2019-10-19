@@ -164,8 +164,13 @@ static int init_memcg_params(struct kmem_cache *s,
 
 static void destroy_memcg_params(struct kmem_cache *s)
 {
-	if (is_root_cache(s))
-		kfree(rcu_access_pointer(s->memcg_params.memcg_caches));
+	if (is_root_cache(s)) {
+		kvfree(rcu_access_pointer(s->memcg_params.memcg_caches));
+	} else {
+		mem_cgroup_put(s->memcg_params.memcg);
+		WRITE_ONCE(s->memcg_params.memcg, NULL);
+		percpu_ref_exit(&s->memcg_params.refcnt);
+	}
 }
 
 static int update_memcg_params(struct kmem_cache *s, int new_array_size)
@@ -210,6 +215,33 @@ int memcg_update_all_caches(int num_memcgs)
 	mutex_unlock(&slab_mutex);
 	return ret;
 }
+<<<<<<< HEAD
+=======
+
+void memcg_link_cache(struct kmem_cache *s, struct mem_cgroup *memcg)
+{
+	if (is_root_cache(s)) {
+		list_add(&s->root_caches_node, &slab_root_caches);
+	} else {
+		css_get(&memcg->css);
+		s->memcg_params.memcg = memcg;
+		list_add(&s->memcg_params.children_node,
+			 &s->memcg_params.root_cache->memcg_params.children);
+		list_add(&s->memcg_params.kmem_caches_node,
+			 &s->memcg_params.memcg->kmem_caches);
+	}
+}
+
+static void memcg_unlink_cache(struct kmem_cache *s)
+{
+	if (is_root_cache(s)) {
+		list_del(&s->root_caches_node);
+	} else {
+		list_del(&s->memcg_params.children_node);
+		list_del(&s->memcg_params.kmem_caches_node);
+	}
+}
+>>>>>>> b749ecfaf6c5... mm: memcg/slab: fix panic in __free_slab() caused by premature memcg pointer release
 #else
 static inline int init_memcg_params(struct kmem_cache *s,
 		struct mem_cgroup *memcg, struct kmem_cache *root_cache)
